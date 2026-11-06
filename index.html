@@ -149,6 +149,10 @@ h1,h2,h3{font-family:var(--f-title);font-weight:400;color:var(--cobalt-dark)}
 .guestbook textarea:focus{border-bottom-color:var(--cobalt)}
 .deadline{font-family:var(--f-sans);font-size:.7rem;text-align:center;margin-top:22px;letter-spacing:2px}
 
+/* Botón de música */
+#audio-btn{position:fixed;bottom:25px;right:25px;width:55px;height:55px;border-radius:50%;background:var(--cobalt);color:#fff;border:1px solid var(--cobalt-light);font-size:1.2rem;cursor:pointer;z-index:9000;box-shadow:0 4px 15px rgba(0,30,80,.35);display:none;align-items:center;justify-content:center;transition:transform .3s}
+#audio-btn:hover{transform:scale(1.1)}
+
 /* Lightbox */
 #lightbox{position:fixed;inset:0;background:rgba(0,20,60,.95);z-index:10000;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s}
 #lightbox.active{opacity:1;visibility:visible}
@@ -169,6 +173,10 @@ h2:not(.dress-main),.names .name,.save-date{background:linear-gradient(110deg,va
 </style>
 </head>
 <body>
+
+<!-- AUDIO DE FONDO -->
+<audio id="bg-audio" loop preload="auto"><source src="assets/song.mp3" type="audio/mpeg"></audio>
+<button id="audio-btn" onclick="toggleAudio()" aria-label="Música"><i class="fa-solid fa-pause" id="audio-icon"></i></button>
 
 <!-- LIGHTBOX -->
 <div id="lightbox" onclick="closeLightbox()">
@@ -402,14 +410,25 @@ h2:not(.dress-main),.names .name,.save-date{background:linear-gradient(110deg,va
 <footer class="footer"><p>INVYTIA VIP DESIGN</p></footer>
 
 <script>
+const audio = document.getElementById('bg-audio');
+const audioIcon = document.getElementById('audio-icon');
+function setIcon(playing){ audioIcon.className = playing ? 'fa-solid fa-pause' : 'fa-solid fa-music'; }
+function toggleAudio(){
+  if(audio.paused){ audio.play().then(()=>setIcon(true)).catch(()=>{}); }
+  else { audio.pause(); setIcon(false); }
+}
 function openInvitation(){
   if(window._opened) return; window._opened = true;
+  // El toque en el sobre es el gesto que permite reproducir la música
+  audio.volume = 0.8;
+  audio.play().then(()=>setIcon(true)).catch(()=>setIcon(false));
   const screen = document.getElementById('envelope-screen');
   document.querySelector('.envelope-wrapper').classList.add('open');
   setTimeout(()=>{
     screen.style.opacity='0';
     const c = document.getElementById('invitation-content');
     c.style.visibility='visible'; c.style.opacity='1';
+    document.getElementById('audio-btn').style.display='flex';
     setTimeout(()=>{ screen.style.display='none'; },1000);
   },900);
 }
