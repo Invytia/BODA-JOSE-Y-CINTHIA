@@ -30,7 +30,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--f-body);overflow-x
 @media (prefers-reduced-motion:reduce){.anim-el{opacity:1;transform:none;transition:none}*{animation:none!important}}
 
 /* Sobre */
-#envelope-screen{position:fixed;inset:0;background:var(--cobalt-dark);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1s ease}
+#envelope-screen{position:fixed;inset:0;background:linear-gradient(rgba(0,30,80,.45),rgba(0,30,80,.55)),url('assets/1.jpg') center/cover no-repeat,var(--cobalt-dark);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1s ease}
 .envelope-wrapper{position:relative;width:340px;height:230px;cursor:pointer;perspective:1200px;transition:transform .4s ease;}
 @media(max-width:380px){.envelope-wrapper{zoom:.85}}
 .envelope-wrapper:hover{transform:scale(1.05)}
