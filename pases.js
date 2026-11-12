@@ -1,5 +1,8 @@
 /* INVYTIA · Pases nominales — uso: tuboda.com/?id=n
    Formato: id:[nombre, pases adultos, pases niños] */
+/* ⬇⬇ PEGA AQUÍ la URL de tu Apps Script (termina en /exec) ⬇⬇ */
+const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx5EdnkTJq3WW73j1hRwLj559_HuM0M6P2DSwY29zD71QB33SfRYx3Q0upLFKT8KLvj8w/exec';
+
 const PASES = {
   1:["Familia Ramírez Mateo", 4, 0],
   2:["Familia Mateo Ramírez", 4, 0],
@@ -160,17 +163,40 @@ document.addEventListener('DOMContentLoaded', function(){
   if(nombre) document.getElementById('rsvpNombre').value = nombre;
 });
 
-// RSVP por WhatsApp (incluye los lugares asignados al pase)
-function sendRSVP(telefono){
+// Registra en Google Sheets (sin bloquear WhatsApp)
+function enviarASheet(payload){
+  if(!SHEET_ENDPOINT) return;
+  try{
+    fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',keepalive:true,
+      headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).catch(()=>{});
+  }catch(e){}
+}
+
+// RSVP: registra en la hoja y abre WhatsApp
+function sendRSVP(telefono, destino){
   const nombre = document.getElementById('rsvpNombre').value.trim();
   const asis = document.getElementById('rsvpAsistencia').value;
   if(!nombre || !asis){ alert("Por favor, completa tu nombre y tu respuesta."); return; }
-  let m = `Hola, soy *${nombre}*.\n\nQuiero confirmar mi respuesta a la boda de José y Cinthia: *${asis}*\n`;
   const p = window.GUEST_PASS;
+  let m = `Hola, soy *${nombre}*.\n\nQuiero confirmar mi respuesta a la boda de José y Cinthia: *${asis}*\n`;
   if(p){
     m += `\nPase #${p.id}: ${p.adultos} lugar${p.adultos===1?'':'es'}`;
     if(p.ninos>0) m += ` + ${p.ninos} para niño${p.ninos===1?'':'s'}`;
     m += `\n`;
   }
+  enviarASheet({tipo:'rsvp', id:p?p.id:'', pase:p?p.nombre:'', nombre, respuesta:asis,
+    adultos:p?p.adultos:'', ninos:p?p.ninos:'', destino:(destino||'').replace(/^(la|el)\s+/,'')});
   window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(m)}`,'_blank');
+}
+
+// Libro de firmas: registra en la hoja y abre WhatsApp
+function sendGuestbook(telefono){
+  const n = document.getElementById('firmaNombre').value.trim();
+  const m = document.getElementById('firmaMensaje').value.trim();
+  if(!n || !m){ alert("Por favor, escribe tu nombre y tu mensaje."); return; }
+  const p = window.GUEST_PASS;
+  enviarASheet({tipo:'firma', id:p?p.id:'', nombre:n, mensaje:m,
+    destino: telefono==='5219221222268' ? 'novia' : 'novio'});
+  const msg = `¡Hola José y Cinthia! Les dejo este mensaje para su libro de firmas:\n\n"${m}"\n\n— *${n}*`;
+  window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(msg)}`,'_blank');
 }
