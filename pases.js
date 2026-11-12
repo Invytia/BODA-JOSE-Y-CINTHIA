@@ -1,7 +1,7 @@
 /* INVYTIA · Pases nominales — uso: tuboda.com/?id=n
    Formato: id:[nombre, pases adultos, pases niños] */
 /* ⬇⬇ PEGA AQUÍ la URL de tu Apps Script (termina en /exec) ⬇⬇ */
-const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx5EdnkTJq3WW73j1hRwLj559_HuM0M6P2DSwY29zD71QB33SfRYx3Q0upLFKT8KLvj8w/exec';
+const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzs2PEMruJtXAfOS3uUa49-DBNS9tPpgVRH03Eg25JKIkhtbcDQ9tgEauAx-AetWoDgVg/exec';
 
 const PASES = {
   1:["Familia Ramírez Mateo", 4, 0],
