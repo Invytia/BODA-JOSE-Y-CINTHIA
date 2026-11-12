@@ -161,6 +161,23 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('dynamicGuestList').innerHTML = '';
   document.getElementById('genericRSVPInputs').style.display = '';
   if(nombre) document.getElementById('rsvpNombre').value = nombre;
+
+  // Selector: cuántas personas de las asignadas asisten
+  const fgResp = document.getElementById('rsvpAsistencia').closest('.fg');
+  const box = document.createElement('div');
+  box.id = 'asistentesBox'; box.style.display = 'none';
+  const opts = (min,max)=>{ let o=''; for(let i=min;i<=max;i++) o+=`<option value="${i}">${i}</option>`; return o; };
+  let hh = `<div class="fg"><label for="asisAdultos">¿Cuántos adultos asistirán? (máx. ${adultos})</label>
+    <select id="asisAdultos"><option value="">Selecciona una opción</option>${opts(1,adultos)}</select></div>`;
+  if(ninos > 0){
+    hh += `<div class="fg"><label for="asisNinos">¿Cuántos niños asistirán? (máx. ${ninos})</label>
+    <select id="asisNinos">${opts(0,ninos)}</select></div>`;
+  }
+  box.innerHTML = hh;
+  fgResp.insertAdjacentElement('afterend', box);
+  const toggle = ()=>{ box.style.display = document.getElementById('rsvpAsistencia').value.indexOf('Sí')!==-1 ? 'block' : 'none'; };
+  document.getElementById('rsvpAsistencia').addEventListener('change', toggle);
+  toggle();
 });
 
 // Registra en Google Sheets (sin bloquear WhatsApp)
@@ -178,14 +195,29 @@ function sendRSVP(telefono, destino){
   const asis = document.getElementById('rsvpAsistencia').value;
   if(!nombre || !asis){ alert("Por favor, completa tu nombre y tu respuesta."); return; }
   const p = window.GUEST_PASS;
+  const va = asis.indexOf('Sí')!==-1;
+  let aA = '', aN = '';
+  if(p && va){
+    aA = document.getElementById('asisAdultos').value;
+    if(!aA){ alert("Por favor, indica cuántos adultos asistirán."); return; }
+    const sn = document.getElementById('asisNinos');
+    aN = sn ? sn.value : '0';
+    aA = parseInt(aA,10); aN = parseInt(aN||'0',10);
+  }
   let m = `Hola, soy *${nombre}*.\n\nQuiero confirmar mi respuesta a la boda de José y Cinthia: *${asis}*\n`;
   if(p){
     m += `\nPase #${p.id}: ${p.adultos} lugar${p.adultos===1?'':'es'}`;
     if(p.ninos>0) m += ` + ${p.ninos} para niño${p.ninos===1?'':'s'}`;
     m += `\n`;
+    if(va){
+      m += `\n👥 *Asistiremos:* ${aA} adulto${aA===1?'':'s'}`;
+      if(p.ninos>0) m += ` y ${aN} niño${aN===1?'':'s'}`;
+      m += `\n`;
+    }
   }
   enviarASheet({tipo:'rsvp', id:p?p.id:'', pase:p?p.nombre:'', nombre, respuesta:asis,
-    adultos:p?p.adultos:'', ninos:p?p.ninos:'', destino:(destino||'').replace(/^(la|el)\s+/,'')});
+    adultos:p?p.adultos:'', ninos:p?p.ninos:'', asisten_adultos:aA, asisten_ninos:aN,
+    destino:(destino||'').replace(/^(la|el)\s+/,'')});
   window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(m)}`,'_blank');
 }
 
